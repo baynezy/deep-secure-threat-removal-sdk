@@ -1,7 +1,7 @@
 name: CI/CD
 
 env:
-  VERSION_NUMBER: 0.0.0
+  VERSION_NUMBER: 0.1.0
   NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
 
 on:

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -139,7 +140,7 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 
 			public override string ToString()
 			{
-				return JsonSerializer.Serialize(this, _serializerOptions);
+				return String.Format("{{\"error\":{0}}}", JsonSerializer.Serialize(this, _serializerOptions));
 			}
 		}
 	}

@@ -8,7 +8,7 @@ This project is a .Net SDK to work with the [Deep Secure Threat Removal API](htt
 
 ### NuGet
 
-[![NuGet](https://img.shields.io/nuget/v/DeepSecure.ThreatRemoval?style=flat-square)](https://www.nuget.org/packages/DeepSecure.ThreatRemoval/)[![NuGet](https://img.shields.io/nuget/dt/DeepSecure.ThreatRemoval?style=flat-square)](https://www.nuget.org/packages/DeepSecure.ThreatRemoval/)
+[![NuGet](https://img.shields.io/nuget/v/DeepSecure.ThreatRemoval?style=square)](https://www.nuget.org/packages/DeepSecure.ThreatRemoval/)[![NuGet](https://img.shields.io/nuget/dt/DeepSecure.ThreatRemoval?style=square)](https://www.nuget.org/packages/DeepSecure.ThreatRemoval/)
 
 ```posh
 dotnet add package DeepSecure.ThreatRemoval

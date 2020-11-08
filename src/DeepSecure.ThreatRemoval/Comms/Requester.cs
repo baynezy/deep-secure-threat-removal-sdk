@@ -28,6 +28,11 @@ namespace DeepSecure.ThreatRemoval.Comms
 			_config = config;
 		}
 
+		public Requester(IConfig config) : this(new HttpClient(), config)
+		{
+
+		}
+
 		/// <summary>
 		/// Call the instant threat removal API.
 		/// </summary>

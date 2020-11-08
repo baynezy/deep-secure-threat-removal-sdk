@@ -14,6 +14,19 @@ This project is a .Net SDK to work with the [Deep Secure Threat Removal API](htt
 dotnet add package DeepSecure.ThreatRemoval
 ```
 
+## Usage
+
+```csharp
+var config = new Config("<url for deep secure instant API>", "Yor API key");
+var requester = new Requester(config);
+var converter = new ConvertFile(requester);
+
+var path = @"path/to/file.pdf";
+var file = File.ReadAllBytes(path);
+var response = await converter.Sync(file, MimeType.ImageJpeg);
+var convertedFile = response.File;
+```
+
 ## Contributing
 
 Pull requests are always welcome. Please read the [contributing guidelines](.github/CONTRIBUTING.md).

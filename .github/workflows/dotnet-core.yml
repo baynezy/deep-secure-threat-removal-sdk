@@ -1,0 +1,44 @@
+name: CI/CD
+
+env:
+  VERSION_NUMBER: 0.1.0
+  NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+
+on:
+  push:
+    branches:
+    - master
+    - develop
+    - feature/*
+    - release/*
+    - hotfix/*
+  pull_request:
+    branches: [ develop ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test-and-deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Output Version Number
+      run: echo "Version-$VERSION_NUMBER.$GITHUB_RUN_NUMBER"
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    - name: Test
+      run: dotnet test ./test/DeepSecure.ThreatRemoval.Test/DeepSecure.ThreatRemoval.Test.csproj --no-restore --verbosity normal
+    - name: Package
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+      run: dotnet pack ./src/DeepSecure.ThreatRemoval/DeepSecure.ThreatRemoval.csproj -c Release /P:PackageVersion=$VERSION_NUMBER.$GITHUB_RUN_NUMBER
+    - name: Publish
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+      run: nuget push ./src/DeepSecure.ThreatRemoval/bin/Release/DeepSecure.ThreatRemoval.$VERSION_NUMBER.$GITHUB_RUN_NUMBER.nupkg -ApiKey $NUGET_KEY -NonInteractive -Source https://www.nuget.org/api/v2/package
+

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Authors>Simon Baynes</Authors>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/baynezy/deep-secure-threat-removal-sdk</PackageProjectUrl>
+    <Description>A .Net Core SDK for working with Deep Secure's Threat Removal API</Description>
+    <Copyright>© Simon Baynes 2020</Copyright>
+    <PackageTags>Threat Removal;File Cleansing</PackageTags>
+  </PropertyGroup>
+
+</Project>

@@ -28,6 +28,11 @@ namespace DeepSecure.ThreatRemoval.Comms
 			_config = config;
 		}
 
+		public Requester(IConfig config) : this(new HttpClient(), config)
+		{
+
+		}
+
 		/// <summary>
 		/// Call the instant threat removal API.
 		/// </summary>
@@ -65,7 +70,8 @@ namespace DeepSecure.ThreatRemoval.Comms
 				}
 
 				var body = await response.Content.ReadAsStringAsync();
-				var apiErrorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(body, _serializerOptions);
+				var apiResponse = JsonSerializer.Deserialize<ApiResponse>(body, _serializerOptions);
+				var apiErrorResponse = apiResponse.Error;
 
 				throw new ApiRequestException(String.Format("API Request Failed with a {0} response.", statusCode), apiErrorResponse, ex);
 			}
@@ -76,6 +82,11 @@ namespace DeepSecure.ThreatRemoval.Comms
 		private bool exceptionHasUnexpectedStatusCode(int statusCode)
 		{
 			return _acceptableNon200StatusCodes.IndexOf(statusCode) == -1;
+		}
+
+		private class ApiResponse
+		{
+			public ApiErrorResponse Error { get; set; }
 		}
 	}
 }

@@ -15,9 +15,10 @@ namespace DeepSecure.ThreatRemoval.Comms
 	/// </summary>
 	public class Requester : IRequester
 	{
-		private static JsonSerializerOptions _serializerOptions = new JsonSerializerOptions {
-				PropertyNameCaseInsensitive = true
-			};
+		private static JsonSerializerOptions _serializerOptions = new JsonSerializerOptions
+		{
+			PropertyNameCaseInsensitive = true
+		};
 		private static IList<int> _acceptableNon200StatusCodes = new List<int>{400,429,500};
 		private readonly HttpClient _client;
 		private readonly IConfig _config;
@@ -61,7 +62,8 @@ namespace DeepSecure.ThreatRemoval.Comms
 			{
 				response.EnsureSuccessStatusCode();
 			}
-			catch (HttpRequestException ex) {
+			catch (HttpRequestException ex)
+			{
 				var statusCode = (int)response.StatusCode;
 
 				if (exceptionHasUnexpectedStatusCode(statusCode))

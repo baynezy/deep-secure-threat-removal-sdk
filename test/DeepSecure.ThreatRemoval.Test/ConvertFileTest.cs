@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using DeepSecure.ThreatRemoval.Comms;
@@ -25,7 +26,7 @@ namespace DeepSecure.ThreatRemoval.Test
 			var file = File.ReadAllBytes(path);
 			var mimeType = MimeType.ApplicationPdf;
 			var mockRequester = new Mock<IRequester>();
-			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>())).ReturnsAsync(new byte[0]);
+			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>())).ReturnsAsync(new ApiResponse {File=new byte[0]});
 			var converter = CreateConverter(mockRequester.Object);
 
 			await converter.Sync(file, mimeType);
@@ -41,11 +42,68 @@ namespace DeepSecure.ThreatRemoval.Test
 			var returnedFile = File.ReadAllBytes(path);
 			var mimeType = MimeType.ApplicationPdf;
 			var mockRequester = new Mock<IRequester>();
-			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>())).ReturnsAsync(returnedFile);
+			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>())).ReturnsAsync(new ApiResponse{File = returnedFile});
 			var converter = CreateConverter(mockRequester.Object);
 
 			var response = await converter.Sync(dummyFile, mimeType);
 
+			Assert.That(response.File, Is.EqualTo(returnedFile));
+		}
+
+		[Test]
+		public async Task Sync_WhenConvertingAFileWithRisks_ThenRisksMustBePassedToRequester()
+		{
+			var dummyFile = new byte[10];
+			var mimeType = MimeType.ApplicationPdf;
+			var risks = new RiskOptions {
+				Allow = new List<Risk> {
+					Risk.Exe,
+					Risk.ExeMacro
+				}
+			};
+			var mockRequester = new Mock<IRequester>();
+			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>(), risks)).ReturnsAsync(new ApiResponse{File = new byte[11]});
+			var converter = CreateConverter(mockRequester.Object);
+
+			await converter.Sync(dummyFile, mimeType, risks);
+			mockRequester.Verify(f => f.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>(), risks), Times.Once);
+		}
+
+		[Test]
+		public async Task Sync_WhenReceivingRisksMetadataInTheResponse_ThenMetadataMustBeInTheSyncResponse()
+		{
+			var dummyFile = new byte[10];
+			var mimeType = MimeType.ApplicationPdf;
+			var risksTaken = new List<Risk>();
+			var mockRequester = new Mock<IRequester>();
+			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>())).ReturnsAsync(new ApiResponse{File = new byte[11], RisksTaken = risksTaken});
+			var converter = CreateConverter(mockRequester.Object);
+
+			var response = await converter.Sync(dummyFile, mimeType);
+
+			Assert.That(response.RisksTaken, Is.EqualTo(risksTaken));
+		}
+
+		[Test]
+		public async Task Sync_ConvertingAFileWithRisksAndReceivingRisksMetadataInTheResponse_ThenMetadataAndFileMustBeInTheSyncResponse()
+		{
+			var dummyFile = new byte[10];
+			var returnedFile = new byte[11];
+			var mimeType = MimeType.ApplicationPdf;
+			var risksTaken = new List<Risk>();
+			var risks = new RiskOptions {
+				Allow = new List<Risk> {
+					Risk.Exe,
+					Risk.ExeMacro
+				}
+			};
+			var mockRequester = new Mock<IRequester>();
+			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>(), It.IsAny<RiskOptions>())).ReturnsAsync(new ApiResponse{File = returnedFile, RisksTaken = risksTaken});
+			var converter = CreateConverter(mockRequester.Object);
+
+			var response = await converter.Sync(dummyFile, mimeType, risks);
+
+			Assert.That(response.RisksTaken, Is.EqualTo(risksTaken));
 			Assert.That(response.File, Is.EqualTo(returnedFile));
 		}
 

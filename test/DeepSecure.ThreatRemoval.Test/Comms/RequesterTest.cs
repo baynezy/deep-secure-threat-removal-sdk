@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
@@ -30,9 +32,9 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 			mockHttp.When("*").Respond(HttpStatusCode.OK, "application/pdf", new MemoryStream(returnedFile));
 			var requester = CreateRequester(mockHttp);
 
-			var cleanedFile = await requester.Sync(new byte[10], MimeType.ApplicationPdf);
+			var response = await requester.Sync(new byte[10], MimeType.ApplicationPdf);
 
-			Assert.That(cleanedFile, Is.EqualTo(returnedFile));
+			Assert.That(response.File, Is.EqualTo(returnedFile));
 		}
 
 		[Test]
@@ -109,6 +111,102 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 			var requester = CreateRequester(mockHttp);
 
 			Assert.ThrowsAsync<HttpRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
+		}
+
+		[Test]
+		public void Sync_WhenPassingRiskAllow_ThenShouldPassAsXOptionsHeader()
+		{
+			const string expectedHeader = "{\"risks\":{\"allow\":[\"exe\"],\"deny\":null}}";
+			var config = new Config ("http://localhost/my/sync/url", "qwerty");
+			var mockHttp = new MockHttpMessageHandler();
+			var risks = new RiskOptions {
+				Allow = new List<Risk> {
+					Risk.Exe
+				}
+			};
+			var mockedRequest = mockHttp.Expect(config.SyncUrl)
+					.WithHeaders("X-Options", expectedHeader);
+			var requester = CreateRequester(mockHttp, config);
+
+			requester.Sync(new byte[10], MimeType.ApplicationPdf, risks);
+
+			Assert.That(mockHttp.GetMatchCount(mockedRequest), Is.EqualTo(1), string.Format("Request did not match signature. Expected: {0}", expectedHeader));
+		}
+
+		[Test]
+		public void Sync_WhenPassingRiskDeny_ThenShouldPassAsXOptionsHeader()
+		{
+			const string expectedHeader = "{\"risks\":{\"allow\":null,\"deny\":[\"exe\"]}}";
+			var config = new Config ("http://localhost/my/sync/url", "qwerty");
+			var mockHttp = new MockHttpMessageHandler();
+			var risks = new RiskOptions {
+				Deny = new List<Risk> {
+					Risk.Exe
+				}
+			};
+			var mockedRequest = mockHttp.Expect(config.SyncUrl)
+					.WithHeaders("X-Options", expectedHeader);
+			var requester = CreateRequester(mockHttp, config);
+
+			requester.Sync(new byte[10], MimeType.ApplicationPdf, risks);
+
+			Assert.That(mockHttp.GetMatchCount(mockedRequest), Is.EqualTo(1), string.Format("Request did not match signature. Expected: {0}", expectedHeader));
+		}
+
+		[Test]
+		public void Sync_WhenPassingRiskBothAllowAndDeny_ThenShouldPassAsXOptionsHeader()
+		{
+			const string expectedHeader = "{\"risks\":{\"allow\":[\"exe\"],\"deny\":[\"exe/macro\"]}}";
+			var config = new Config ("http://localhost/my/sync/url", "qwerty");
+			var mockHttp = new MockHttpMessageHandler();
+			var risks = new RiskOptions {
+				Allow = new List<Risk> {
+					Risk.Exe
+				},
+				Deny = new List<Risk> {
+					Risk.ExeMacro
+				}
+			};
+			var mockedRequest = mockHttp.Expect(config.SyncUrl)
+					.WithHeaders("X-Options", expectedHeader);
+			var requester = CreateRequester(mockHttp, config);
+
+			requester.Sync(new byte[10], MimeType.ApplicationPdf, risks);
+
+			Assert.That(mockHttp.GetMatchCount(mockedRequest), Is.EqualTo(1), string.Format("Request did not match signature. Expected: {0}", expectedHeader));
+		}
+
+		[Test]
+		public async Task Sync_WhenReturningRiskTakenHeader_ThenShouldBeInApiResponseAsync()
+		{
+			var path = @"../../../Fixtures/clean-file.pdf";
+			var returnedFile = File.ReadAllBytes(path);
+			var mockHttp = new MockHttpMessageHandler();
+			mockHttp.When("*").Respond(HttpStatusCode.OK, new[] { new KeyValuePair<string, string>("X-Risks-Taken", "exe/macro/ms")}, "application/json", new MemoryStream(returnedFile));
+			var requester = CreateRequester(mockHttp);
+
+			var response = await requester.Sync(new byte[10], MimeType.ApplicationPdf);
+
+			Assert.That(response.RisksTaken, Is.Not.Null);
+			Assert.That(response.RisksTaken.Count, Is.EqualTo(1), "RisksTaken contains incorrect number of risks");
+			Assert.That(response.RisksTaken.Contains(Risk.ExeMacroMs), Is.True, "Must contain the 'ExeMacroMs' risk");
+		}
+
+		[Test]
+		public async Task Sync_WhenReturningRisksTakenHeader_ThenShouldBeInApiResponseAsync()
+		{
+			var path = @"../../../Fixtures/clean-file.pdf";
+			var returnedFile = File.ReadAllBytes(path);
+			var mockHttp = new MockHttpMessageHandler();
+			mockHttp.When("*").Respond(HttpStatusCode.OK, new[] { new KeyValuePair<string, string>("X-Risks-Taken", "exe/macro/ms,exe")}, "application/json", new MemoryStream(returnedFile));
+			var requester = CreateRequester(mockHttp);
+
+			var response = await requester.Sync(new byte[10], MimeType.ApplicationPdf);
+
+			Assert.That(response.RisksTaken, Is.Not.Null);
+			Assert.That(response.RisksTaken.Count, Is.EqualTo(2), "RisksTaken contains incorrect number of risks");
+			Assert.That(response.RisksTaken.Contains(Risk.ExeMacroMs), Is.True, "Must contain the 'ExeMacroMs' risk");
+			Assert.That(response.RisksTaken.Contains(Risk.Exe), Is.True, "Must contain the 'Exe' risk");
 		}
 
 		private IRequester CreateRequester(HttpMessageHandler messageHandler = null, IConfig @config = null)

@@ -10,4 +10,8 @@
     <PackageTags>Threat Removal;File Cleansing</PackageTags>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="EnumExtensions.System.Text.Json" Version="1.0.0" />
+  </ItemGroup>
+
 </Project>

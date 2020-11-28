@@ -23,7 +23,7 @@ var converter = new ConvertFile(requester);
 
 var path = @"path/to/file.pdf";
 var file = File.ReadAllBytes(path);
-var response = await converter.Sync(file, MimeType.ImageJpeg);
+var response = await converter.Sync(file, MimeType.ApplicationPdf);
 var convertedFile = response.File;
 ```
 

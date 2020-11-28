@@ -14,6 +14,15 @@ namespace DeepSecure.ThreatRemoval.Comms
 		/// <param name="file">File to be converted to safe version</param>
 		/// <param name="mimeType">The <c>MimeType</c> of the <c>file</c> parameter.</param>
 		/// <returns>The converted file returned from the Deep Secure Threat Removal API</returns>
-		Task<byte[]> Sync(byte[] file, MimeType mimeType);
+		Task<ApiResponse> Sync(byte[] file, MimeType mimeType);
+
+		/// <summary>
+		/// Call the instant threat removal API.
+		/// </summary>
+		/// <param name="file">File to be converted to safe version</param>
+		/// <param name="mimeType">The <c>MimeType</c> of the <c>file</c> parameter.</param>
+		/// <param name="risks">The risks that are or are not accessptable for the transformation</param>
+		/// <returns>The converted file returned from the Deep Secure Threat Removal API</returns>
+		Task<ApiResponse> Sync(byte[] file, MimeType mimeType, RiskOptions risks);
 	}
 }

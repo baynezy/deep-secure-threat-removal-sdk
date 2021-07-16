@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <Authors>Simon Baynes</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/baynezy/deep-secure-threat-removal-sdk</PackageProjectUrl>
@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EnumExtensions.System.Text.Json" Version="1.0.0" />
+    <PackageReference Include="EnumExtensions.System.Text.Json" Version="1.0.1" />
   </ItemGroup>
 
 </Project>

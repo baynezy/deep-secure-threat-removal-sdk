@@ -71,7 +71,12 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: Test
-        run: dotnet test ./test/DeepSecure.ThreatRemoval.Test/DeepSecure.ThreatRemoval.Test.csproj --no-restore --verbosity normal
+        run: dotnet test ./test/DeepSecure.ThreatRemoval.Test/DeepSecure.ThreatRemoval.Test.csproj --no-restore --verbosity normal --logger "junit;LogFileName=results.xml"
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action/composite@v1
+        if: always()
+        with:
+          files: "**/TestResults/*.xml"
 
   publish:
     runs-on: ubuntu-latest

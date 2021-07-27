@@ -17,6 +17,18 @@ on:
   workflow_dispatch:
 
 jobs:
+
+  open-source-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Analyse with FOSSA
+        uses: fossa-contrib/fossa-action@v1
+        with:
+          fossa-api-key: ecbc9c822e743eac0304c1cafcd2136e
+
   static-analysis:
     runs-on: windows-latest
 
@@ -81,7 +93,7 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
-    needs: [static-analysis,build-and-test]
+    needs: [static-analysis,build-and-test,open-source-scan]
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
 
     steps:

@@ -40,12 +40,12 @@ namespace DeepSecure.ThreatRemoval
 		/// </summary>
 		/// <param name="file">File to be converted to safe version</param>
 		/// <param name="mimeType">The <c>MimeType</c> of the <c>file</c> parameter.</param>
-		/// <param name="risks">The risks that are or are not accessptable for the transformation</param>
+		/// <param name="risks">The risks that are or are not acceptable for the transformation</param>
 		/// <returns>The converted file with threats removed</returns>
 		public async Task<SyncResponse> Sync(byte[] file, MimeType mimeType, RiskOptions risks)
 		{
 			var response = await _requester.Sync(file, mimeType, risks);
-			
+
 			return new SyncResponse(response.File, response.RisksTaken);
 		}
 	}

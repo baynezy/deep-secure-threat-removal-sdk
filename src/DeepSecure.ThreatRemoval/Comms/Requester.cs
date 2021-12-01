@@ -17,7 +17,7 @@ namespace DeepSecure.ThreatRemoval.Comms
 	/// </summary>
 	public class Requester : IRequester
 	{
-		private static JsonSerializerOptions _serializerOptions = InitialiseSerialiserOptions();
+		private static readonly JsonSerializerOptions SerializerOptions = InitialiseSerialiserOptions();
 
 		private static JsonSerializerOptions InitialiseSerialiserOptions()
 		{
@@ -31,8 +31,8 @@ namespace DeepSecure.ThreatRemoval.Comms
 			return options;
 		}
 
-		private static readonly string _risksTakenHeader = "X-Risks-Taken";
-		private static readonly IList<int> _acceptableNon200StatusCodes = new List<int>{400,429,500};
+		private const string RisksTakenHeader = "X-Risks-Taken";
+		private static readonly IList<int> AcceptableNon200StatusCodes = new List<int>{400,429,500};
 		private readonly HttpClient _client;
 		private readonly IConfig _config;
 
@@ -86,7 +86,7 @@ namespace DeepSecure.ThreatRemoval.Comms
 				Method = HttpMethod.Post,
 				RequestUri = new Uri(_config.SyncUrl),
 				Headers = {
-					{ HttpRequestHeader.Accept.ToString(), String.Format("{0}, application/json", mimeType.GetStringValue()) },
+					{ HttpRequestHeader.Accept.ToString(), $"{mimeType.GetStringValue()}, application/json" },
 					{ "x-api-key", _config.ApiKey }
 				},
 				Content = content
@@ -104,74 +104,72 @@ namespace DeepSecure.ThreatRemoval.Comms
 			{
 				var statusCode = (int)response.StatusCode;
 
-				if (exceptionHasUnexpectedStatusCode(statusCode))
+				if (ExceptionHasUnexpectedStatusCode(statusCode))
 				{
 					throw;
 				}
 
 				var body = await response.Content.ReadAsStringAsync();
-				var restApiResponse = JsonSerializer.Deserialize<RestApiResponse>(body, _serializerOptions);
+				var restApiResponse = JsonSerializer.Deserialize<RestApiResponse>(body, SerializerOptions);
 				var apiErrorResponse = restApiResponse.Error;
 
-				throw new ApiRequestException(String.Format("API Request Failed with a {0} response.", statusCode), apiErrorResponse, ex);
+				throw new ApiRequestException($"API Request Failed with a {statusCode} response.", apiErrorResponse, ex);
 			}
 
 			var apiResponse = new ApiResponse {
 				File = await response.Content.ReadAsByteArrayAsync()
 			};
 
-			if (responseHasRisksTakenHeader(response))
+			if (ResponseHasRisksTakenHeader(response))
 			{
-				addRisksTakenToApiResponse(apiResponse, response);
+				AddRisksTakenToApiResponse(apiResponse, response);
 			}
 
 			return apiResponse;
 		}
 
-		private void addRisksTakenToApiResponse(ApiResponse apiResponse, HttpResponseMessage response)
+		private static void AddRisksTakenToApiResponse(ApiResponse apiResponse, HttpResponseMessage response)
 		{
-			IEnumerable<string> values;
-			if (response.Headers.TryGetValues(_risksTakenHeader, out values))
-			{
-				var risksTaken = new List<Risk>();
-				values.First()
-					.Split(',', StringSplitOptions.RemoveEmptyEntries)
-					.ToList()
-					.ForEach(r => risksTaken.Add(r.ToEnum<Risk>()));
-				apiResponse.RisksTaken = risksTaken;
-			}
+			if (!response.Headers.TryGetValues(RisksTakenHeader, out var values)) return;
+			var risksTaken = new List<Risk>();
+			values.First()
+				.Split(',', StringSplitOptions.RemoveEmptyEntries)
+				.ToList()
+				.ForEach(r => risksTaken.Add(r.ToEnum<Risk>()));
+			apiResponse.RisksTaken = risksTaken;
 		}
 
-		private bool responseHasRisksTakenHeader(HttpResponseMessage response)
+		private static bool ResponseHasRisksTakenHeader(HttpResponseMessage response)
 		{
-			return response.Headers.Contains(_risksTakenHeader);
+			return response.Headers.Contains(RisksTakenHeader);
 		}
 
-		private void AddXOptionsHeader(HttpRequestMessage request, RiskOptions risks)
+		private static void AddXOptionsHeader(HttpRequestMessage request, RiskOptions risks)
 		{
 			if (risks == null)
 			{
 				return;
 			}
 
-			XOptionsHeader header = new XOptionsHeader{
+			var header = new XOptionsHeader{
 				Risks = risks
 			};
 
-			request.Content.Headers.Add("X-Options", JsonSerializer.Serialize<XOptionsHeader>(header, _serializerOptions));
+			request.Content?.Headers.Add("X-Options",
+				JsonSerializer.Serialize<XOptionsHeader>(header, SerializerOptions));
 		}
 
-		private bool exceptionHasUnexpectedStatusCode(int statusCode)
+		private static bool ExceptionHasUnexpectedStatusCode(int statusCode)
 		{
-			return _acceptableNon200StatusCodes.IndexOf(statusCode) == -1;
+			return AcceptableNon200StatusCodes.IndexOf(statusCode) == -1;
 		}
 
-		private class RestApiResponse
+		private sealed class RestApiResponse
 		{
 			public ApiErrorResponse Error { get; set; }
 		}
 
-		private class XOptionsHeader
+		private sealed class XOptionsHeader
 		{
 			public RiskOptions Risks { get; internal set; }
 		}

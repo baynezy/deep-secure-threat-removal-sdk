@@ -9,13 +9,13 @@ namespace DeepSecure.ThreatRemoval.Model
 	{
 		public Config(string syncUrl, string apiKey)
 		{
-			ErrorIfNull(syncUrl, "SyncUrl");
-			ErrorIfNull(apiKey, "ApiKey");
+			ErrorIfNull(syncUrl, nameof(SyncUrl));
+			ErrorIfNull(apiKey, nameof(ApiKey));
 			SyncUrl = syncUrl;
 			ApiKey = apiKey;
 		}
 
-		private void ErrorIfNull(object parameter, string propertyName)
+		private static void ErrorIfNull(object parameter, string propertyName)
 		{
 			if (parameter == null)
 			{

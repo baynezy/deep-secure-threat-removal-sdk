@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -22,11 +23,11 @@ namespace DeepSecure.ThreatRemoval.Test
 		[Test]
 		public async Task Sync_WhenConvertingAFile_ThenShouldCallRequesterSync()
 		{
-			var path = @"../../../Fixtures/clean-file.pdf";
-			var file = File.ReadAllBytes(path);
-			var mimeType = MimeType.ApplicationPdf;
+			const string path = @"../../../Fixtures/clean-file.pdf";
+			var file = await File.ReadAllBytesAsync(path);
+			const MimeType mimeType = MimeType.ApplicationPdf;
 			var mockRequester = new Mock<IRequester>();
-			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>())).ReturnsAsync(new ApiResponse {File=new byte[0]});
+			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>())).ReturnsAsync(new ApiResponse {File=Array.Empty<byte>()});
 			var converter = CreateConverter(mockRequester.Object);
 
 			await converter.Sync(file, mimeType);
@@ -37,10 +38,10 @@ namespace DeepSecure.ThreatRemoval.Test
 		[Test]
 		public async Task Sync_WhenConvertingAFile_ThenFileReturnedMustMatchFileFromApi()
 		{
-			var dummyFile = new byte[0];
-			var path = @"../../../Fixtures/clean-file.pdf";
-			var returnedFile = File.ReadAllBytes(path);
-			var mimeType = MimeType.ApplicationPdf;
+			var dummyFile = Array.Empty<byte>();
+			const string path = @"../../../Fixtures/clean-file.pdf";
+			var returnedFile = await File.ReadAllBytesAsync(path);
+			const MimeType mimeType = MimeType.ApplicationPdf;
 			var mockRequester = new Mock<IRequester>();
 			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>())).ReturnsAsync(new ApiResponse{File = returnedFile});
 			var converter = CreateConverter(mockRequester.Object);
@@ -54,7 +55,7 @@ namespace DeepSecure.ThreatRemoval.Test
 		public async Task Sync_WhenConvertingAFileWithRisks_ThenRisksMustBePassedToRequester()
 		{
 			var dummyFile = new byte[10];
-			var mimeType = MimeType.ApplicationPdf;
+			const MimeType mimeType = MimeType.ApplicationPdf;
 			var risks = new RiskOptions {
 				Allow = new List<Risk> {
 					Risk.Exe,
@@ -73,7 +74,7 @@ namespace DeepSecure.ThreatRemoval.Test
 		public async Task Sync_WhenReceivingRisksMetadataInTheResponse_ThenMetadataMustBeInTheSyncResponse()
 		{
 			var dummyFile = new byte[10];
-			var mimeType = MimeType.ApplicationPdf;
+			const MimeType mimeType = MimeType.ApplicationPdf;
 			var risksTaken = new List<Risk>();
 			var mockRequester = new Mock<IRequester>();
 			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>())).ReturnsAsync(new ApiResponse{File = new byte[11], RisksTaken = risksTaken});
@@ -89,7 +90,7 @@ namespace DeepSecure.ThreatRemoval.Test
 		{
 			var dummyFile = new byte[10];
 			var returnedFile = new byte[11];
-			var mimeType = MimeType.ApplicationPdf;
+			const MimeType mimeType = MimeType.ApplicationPdf;
 			var risksTaken = new List<Risk>();
 			var risks = new RiskOptions {
 				Allow = new List<Risk> {
@@ -107,7 +108,7 @@ namespace DeepSecure.ThreatRemoval.Test
 			Assert.That(response.File, Is.EqualTo(returnedFile));
 		}
 
-		private IConvertFile CreateConverter(IRequester requester = null)
+		private static IConvertFile CreateConverter(IRequester requester = null)
 		{
 			return new ConvertFile(requester ?? new Mock<IRequester>().Object);
 		}

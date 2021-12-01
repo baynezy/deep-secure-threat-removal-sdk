@@ -9,7 +9,7 @@ namespace DeepSecure.ThreatRemoval.Test.Model
 		[Test]
 		public void ToEnum_WhenConvertingFromString_ThenReturnEnum()
 		{
-			var mimeType = "exe";
+			const string mimeType = "exe";
 			Assert.That(mimeType.ToEnum<Risk>(), Is.EqualTo(Risk.Exe));
 		}
 	}

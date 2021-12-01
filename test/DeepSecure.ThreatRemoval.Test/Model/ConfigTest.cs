@@ -22,23 +22,25 @@ namespace DeepSecure.ThreatRemoval.Test.Model
 			const string apiKey = "qwerty123";
 
 			var ex = Assert.Throws<ArgumentNullException>(() => CreateConfig(syncUrl: syncUrl, apiKey:apiKey));
+			Assert.NotNull(ex);
 			Assert.That(ex.Message, Is.EqualTo("Value cannot be null. (Parameter 'SyncUrl')"));
 		}
 
 		[Test]
 		public void Config_WhenConstructing_ThenApiKeyIsMandatoryAndNotNullable()
 		{
-			const string syncUrl = "http://example.com";
+			const string syncUrl = "https://example.com";
 			const string apiKey = null;
 
 			var ex = Assert.Throws<ArgumentNullException>(() => CreateConfig(syncUrl: syncUrl, apiKey:apiKey));
+			Assert.NotNull(ex);
 			Assert.That(ex.Message, Is.EqualTo("Value cannot be null. (Parameter 'ApiKey')"));
 		}
 
 		[Test]
 		public void SyncUrl_WhenSettingProperty_ThenShouldReturnSameValue()
 		{
-			const string syncUrl = "http://example.com";
+			const string syncUrl = "https://example.com";
 			var config = CreateConfig(syncUrl: syncUrl);
 
 			Assert.That(config.SyncUrl, Is.EqualTo(syncUrl));

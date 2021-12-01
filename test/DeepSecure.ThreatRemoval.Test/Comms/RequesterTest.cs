@@ -1,10 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using DeepSecure.ThreatRemoval.Comms;
 using DeepSecure.ThreatRemoval.Model;
@@ -27,7 +26,7 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 		[Test]
 		public async Task Sync_WhenApiRespondsWith200_TheReturnFileShouldMatchAsync() {
 			var path = @"../../../Fixtures/clean-file.pdf";
-			var returnedFile = File.ReadAllBytes(path);
+			var returnedFile = await File.ReadAllBytesAsync(path);
 			var mockHttp = new MockHttpMessageHandler();
 			mockHttp.When("*").Respond(HttpStatusCode.OK, "application/pdf", new MemoryStream(returnedFile));
 			var requester = CreateRequester(mockHttp);
@@ -52,6 +51,7 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 			var requester = CreateRequester(mockHttp);
 
 			var ex = Assert.ThrowsAsync<ApiRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
+			Assert.NotNull(ex);
 			Assert.That(ex.ApiErrorResponse.Code, Is.EqualTo(errorResponse.Code));
 			Assert.That(ex.ApiErrorResponse.Message, Is.EqualTo(errorResponse.Message));
 			Assert.That(ex.ApiErrorResponse.Name, Is.EqualTo(errorResponse.Name));
@@ -67,6 +67,7 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 			var requester = CreateRequester(mockHttp);
 
 			var ex = Assert.ThrowsAsync<ApiRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
+			Assert.NotNull(ex);
 			Assert.That(ex.InnerException, Is.TypeOf<HttpRequestException>());
 		}
 
@@ -78,6 +79,7 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 			var requester = CreateRequester(mockHttp);
 
 			var ex = Assert.ThrowsAsync<ApiRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
+			Assert.NotNull(ex);
 			Assert.That(ex.Message, Is.EqualTo("API Request Failed with a 500 response."));
 		}
 
@@ -89,6 +91,7 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 			var requester = CreateRequester(mockHttp);
 
 			var ex = Assert.ThrowsAsync<ApiRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
+			Assert.NotNull(ex);
 			Assert.That(ex.Message, Is.EqualTo("API Request Failed with a 400 response."));
 		}
 
@@ -100,6 +103,7 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 			var requester = CreateRequester(mockHttp);
 
 			var ex = Assert.ThrowsAsync<ApiRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
+			Assert.NotNull(ex);
 			Assert.That(ex.Message, Is.EqualTo("API Request Failed with a 429 response."));
 		}
 
@@ -130,7 +134,8 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 
 			requester.Sync(new byte[10], MimeType.ApplicationPdf, risks);
 
-			Assert.That(mockHttp.GetMatchCount(mockedRequest), Is.EqualTo(1), string.Format("Request did not match signature. Expected: {0}", expectedHeader));
+			Assert.That(mockHttp.GetMatchCount(mockedRequest), Is.EqualTo(1),
+				$"Request did not match signature. Expected: {expectedHeader}");
 		}
 
 		[Test]
@@ -150,7 +155,8 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 
 			requester.Sync(new byte[10], MimeType.ApplicationPdf, risks);
 
-			Assert.That(mockHttp.GetMatchCount(mockedRequest), Is.EqualTo(1), string.Format("Request did not match signature. Expected: {0}", expectedHeader));
+			Assert.That(mockHttp.GetMatchCount(mockedRequest), Is.EqualTo(1),
+				$"Request did not match signature. Expected: {expectedHeader}");
 		}
 
 		[Test]
@@ -173,14 +179,15 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 
 			requester.Sync(new byte[10], MimeType.ApplicationPdf, risks);
 
-			Assert.That(mockHttp.GetMatchCount(mockedRequest), Is.EqualTo(1), string.Format("Request did not match signature. Expected: {0}", expectedHeader));
+			Assert.That(mockHttp.GetMatchCount(mockedRequest), Is.EqualTo(1),
+				$"Request did not match signature. Expected: {expectedHeader}");
 		}
 
 		[Test]
 		public async Task Sync_WhenReturningRiskTakenHeader_ThenShouldBeInApiResponseAsync()
 		{
 			var path = @"../../../Fixtures/clean-file.pdf";
-			var returnedFile = File.ReadAllBytes(path);
+			var returnedFile = await File.ReadAllBytesAsync(path);
 			var mockHttp = new MockHttpMessageHandler();
 			mockHttp.When("*").Respond(HttpStatusCode.OK, new[] { new KeyValuePair<string, string>("X-Risks-Taken", "exe/macro/ms")}, "application/json", new MemoryStream(returnedFile));
 			var requester = CreateRequester(mockHttp);
@@ -196,7 +203,7 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 		public async Task Sync_WhenReturningRisksTakenHeader_ThenShouldBeInApiResponseAsync()
 		{
 			var path = @"../../../Fixtures/clean-file.pdf";
-			var returnedFile = File.ReadAllBytes(path);
+			var returnedFile = await File.ReadAllBytesAsync(path);
 			var mockHttp = new MockHttpMessageHandler();
 			mockHttp.When("*").Respond(HttpStatusCode.OK, new[] { new KeyValuePair<string, string>("X-Risks-Taken", "exe/macro/ms,exe")}, "application/json", new MemoryStream(returnedFile));
 			var requester = CreateRequester(mockHttp);
@@ -226,19 +233,19 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 
 		private class TestApiErrorResponse
 		{
-			private static JsonSerializerOptions _serializerOptions = new JsonSerializerOptions {
+			private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions {
 				PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-				IgnoreNullValues = true
+				DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
 			};
-			public string Message { get; internal set; }
-			public string Path { get; internal set; }
-			public int Code { get; internal set; }
-			public string Name { get; internal set; }
-			public string Type { get; internal set; }
+			public string Message { get; internal init; }
+			public string Path { get; internal init; }
+			public int Code { get; internal init; }
+			public string Name { get; internal init; }
+			public string Type { get; internal init; }
 
 			public override string ToString()
 			{
-				return String.Format("{{\"error\":{0}}}", JsonSerializer.Serialize(this, _serializerOptions));
+				return $"{{\"error\":{JsonSerializer.Serialize(this, SerializerOptions)}}}";
 			}
 		}
 	}

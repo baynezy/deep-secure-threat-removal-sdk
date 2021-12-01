@@ -25,8 +25,8 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 
 		[Test]
 		public async Task Sync_WhenApiRespondsWith200_TheReturnFileShouldMatchAsync() {
-			var path = @"../../../Fixtures/clean-file.pdf";
-			var returnedFile = await File.ReadAllBytesAsync(path);
+			const string path = @"../../../Fixtures/clean-file.pdf";
+			var returnedFile = await File.ReadAllBytesAsync(path).ConfigureAwait(false);
 			var mockHttp = new MockHttpMessageHandler();
 			mockHttp.When("*").Respond(HttpStatusCode.OK, "application/pdf", new MemoryStream(returnedFile));
 			var requester = CreateRequester(mockHttp);

@@ -130,7 +130,7 @@ namespace DeepSecure.ThreatRemoval.Comms
 
 		private static void AddRisksTakenToApiResponse(ApiResponse apiResponse, HttpResponseMessage response)
 		{
-			if (!response.Headers.TryGetValues(RisksTakenHeader, out var values)) return;
+			if (!response.Headers.TryGetValues(RisksTakenHeader, out var values)) { return;}
 			var risksTaken = new List<Risk>();
 			values.First()
 				.Split(',', StringSplitOptions.RemoveEmptyEntries)
@@ -156,7 +156,7 @@ namespace DeepSecure.ThreatRemoval.Comms
 			};
 
 			request.Content?.Headers.Add("X-Options",
-				JsonSerializer.Serialize<XOptionsHeader>(header, SerializerOptions));
+				JsonSerializer.Serialize(header, SerializerOptions));
 		}
 
 		private static bool ExceptionHasUnexpectedStatusCode(int statusCode)

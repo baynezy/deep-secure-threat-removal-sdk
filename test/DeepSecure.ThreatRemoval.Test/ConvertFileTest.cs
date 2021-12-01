@@ -24,7 +24,7 @@ namespace DeepSecure.ThreatRemoval.Test
 		public async Task Sync_WhenConvertingAFile_ThenShouldCallRequesterSync()
 		{
 			const string path = @"../../../Fixtures/clean-file.pdf";
-			var file = await File.ReadAllBytesAsync(path);
+			var file = await File.ReadAllBytesAsync(path).ConfigureAwait(false);;
 			const MimeType mimeType = MimeType.ApplicationPdf;
 			var mockRequester = new Mock<IRequester>();
 			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>())).ReturnsAsync(new ApiResponse {File=Array.Empty<byte>()});
@@ -40,7 +40,7 @@ namespace DeepSecure.ThreatRemoval.Test
 		{
 			var dummyFile = Array.Empty<byte>();
 			const string path = @"../../../Fixtures/clean-file.pdf";
-			var returnedFile = await File.ReadAllBytesAsync(path);
+			var returnedFile = await File.ReadAllBytesAsync(path).ConfigureAwait(false);;
 			const MimeType mimeType = MimeType.ApplicationPdf;
 			var mockRequester = new Mock<IRequester>();
 			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>())).ReturnsAsync(new ApiResponse{File = returnedFile});

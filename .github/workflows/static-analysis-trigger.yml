@@ -15,3 +15,7 @@ jobs:
         run: |
           mkdir -p ./pr
           echo "${{ steps.save-branch-name.outputs.branch }}" > ./pr/branch.txt
+      - uses: actions/upload-artifact@v2
+        with:
+          name: pr
+          path: pr/

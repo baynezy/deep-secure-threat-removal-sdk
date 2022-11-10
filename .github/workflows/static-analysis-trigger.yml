@@ -8,13 +8,10 @@ jobs:
   save-branch-name:
     runs-on: ubuntu-latest
     steps:
-      - name: Generate branch name
-        id: save-branch-name
-        run: echo "::set-output name=branch::$(echo ${GITHUB_HEAD_REF})"
       - name: Persist branch name
         run: |
           mkdir -p ./pr
-          echo "${{ steps.save-branch-name.outputs.branch }}" > ./pr/branch.txt
+          echo "${{ GITHUB_HEAD_REF }}" > ./pr/branch.txt
       - name: Upload branch name
         uses: actions/upload-artifact@v2
         with:

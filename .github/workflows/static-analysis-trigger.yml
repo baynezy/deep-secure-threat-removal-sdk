@@ -1,0 +1,5 @@
+﻿name: Static Analysis Trigger
+
+on:
+  pull_request:
+    branches: [develop]

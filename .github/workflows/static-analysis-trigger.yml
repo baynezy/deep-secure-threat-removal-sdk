@@ -3,3 +3,13 @@
 on:
   pull_request:
     branches: [develop]
+    
+jobs:
+  save-branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Save branch name
+        id: save-branch-name
+        run: echo "::set-output name=branch::$(echo ${GITHUB_HEAD_REF})"
+      - name: Echo branch name
+        run: echo ${{ steps.save-branch-name.outputs.branch }}

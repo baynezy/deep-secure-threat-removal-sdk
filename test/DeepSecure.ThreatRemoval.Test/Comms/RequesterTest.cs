@@ -187,7 +187,7 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 		public async Task Sync_WhenReturningRiskTakenHeader_ThenShouldBeInApiResponseAsync()
 		{
 			var path = @"../../../Fixtures/clean-file.pdf";
-			var returnedFile = await File.ReadAllBytesAsync(path);
+			var returnedFile = await File.ReadAllBytesAsync(path).ConfigureAwait(false);
 			var mockHttp = new MockHttpMessageHandler();
 			mockHttp.When("*").Respond(HttpStatusCode.OK, new[] { new KeyValuePair<string, string>("X-Risks-Taken", "exe/macro/ms")}, "application/json", new MemoryStream(returnedFile));
 			var requester = CreateRequester(mockHttp);

@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using DeepSecure.ThreatRemoval.Comms;
 using DeepSecure.ThreatRemoval.Model;
-using Moq;
+using NSubstitute;
 using NUnit.Framework;
 
 namespace DeepSecure.ThreatRemoval.Test
@@ -26,13 +26,13 @@ namespace DeepSecure.ThreatRemoval.Test
 			const string path = @"../../../Fixtures/clean-file.pdf";
 			var file = await File.ReadAllBytesAsync(path).ConfigureAwait(false);
 			const MimeType mimeType = MimeType.ApplicationPdf;
-			var mockRequester = new Mock<IRequester>();
-			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>())).ReturnsAsync(new ApiResponse {File=Array.Empty<byte>()});
-			var converter = CreateConverter(mockRequester.Object);
+			var mockRequester = Substitute.For<IRequester>();
+			mockRequester.Sync(Arg.Any<byte[]>(), Arg.Any<MimeType>()).Returns(new ApiResponse{File = Array.Empty<byte>()});
+			var converter = CreateConverter(mockRequester);
 
 			await converter.Sync(file, mimeType);
 
-			mockRequester.Verify(f => f.Sync(file, mimeType), Times.Once);
+			await mockRequester.Received(1).Sync(file, mimeType);
 		}
 
 		[Test]
@@ -42,9 +42,9 @@ namespace DeepSecure.ThreatRemoval.Test
 			const string path = @"../../../Fixtures/clean-file.pdf";
 			var returnedFile = await File.ReadAllBytesAsync(path).ConfigureAwait(false);
 			const MimeType mimeType = MimeType.ApplicationPdf;
-			var mockRequester = new Mock<IRequester>();
-			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>())).ReturnsAsync(new ApiResponse{File = returnedFile});
-			var converter = CreateConverter(mockRequester.Object);
+			var mockRequester = Substitute.For<IRequester>();
+			mockRequester.Sync(Arg.Any<byte[]>(), Arg.Any<MimeType>()).Returns(new ApiResponse{File = returnedFile});
+			var converter = CreateConverter(mockRequester);
 
 			var response = await converter.Sync(dummyFile, mimeType);
 
@@ -62,12 +62,12 @@ namespace DeepSecure.ThreatRemoval.Test
 					Risk.ExeMacro
 				}
 			};
-			var mockRequester = new Mock<IRequester>();
-			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>(), risks)).ReturnsAsync(new ApiResponse{File = new byte[11]});
-			var converter = CreateConverter(mockRequester.Object);
+			var mockRequester = Substitute.For<IRequester>();
+			mockRequester.Sync(Arg.Any<byte[]>(), Arg.Any<MimeType>(), risks).Returns(new ApiResponse{File = new byte[11]});
+			var converter = CreateConverter(mockRequester);
 
 			await converter.Sync(dummyFile, mimeType, risks);
-			mockRequester.Verify(f => f.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>(), risks), Times.Once);
+			await mockRequester.Received(1).Sync(Arg.Any<byte[]>(), Arg.Any<MimeType>(), risks);
 		}
 
 		[Test]
@@ -76,9 +76,9 @@ namespace DeepSecure.ThreatRemoval.Test
 			var dummyFile = new byte[10];
 			const MimeType mimeType = MimeType.ApplicationPdf;
 			var risksTaken = new List<Risk>();
-			var mockRequester = new Mock<IRequester>();
-			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>())).ReturnsAsync(new ApiResponse{File = new byte[11], RisksTaken = risksTaken});
-			var converter = CreateConverter(mockRequester.Object);
+			var mockRequester = Substitute.For<IRequester>();
+			mockRequester.Sync(Arg.Any<byte[]>(), Arg.Any<MimeType>()).Returns(new ApiResponse{File = new byte[11], RisksTaken = risksTaken});
+			var converter = CreateConverter(mockRequester);
 
 			var response = await converter.Sync(dummyFile, mimeType);
 
@@ -98,9 +98,9 @@ namespace DeepSecure.ThreatRemoval.Test
 					Risk.ExeMacro
 				}
 			};
-			var mockRequester = new Mock<IRequester>();
-			mockRequester.Setup(m => m.Sync(It.IsAny<byte[]>(), It.IsAny<MimeType>(), It.IsAny<RiskOptions>())).ReturnsAsync(new ApiResponse{File = returnedFile, RisksTaken = risksTaken});
-			var converter = CreateConverter(mockRequester.Object);
+			var mockRequester = Substitute.For<IRequester>();
+			mockRequester.Sync(Arg.Any<byte[]>(), Arg.Any<MimeType>(), Arg.Any<RiskOptions>()).Returns(new ApiResponse{File = returnedFile, RisksTaken = risksTaken});
+			var converter = CreateConverter(mockRequester);
 
 			var response = await converter.Sync(dummyFile, mimeType, risks);
 
@@ -110,7 +110,7 @@ namespace DeepSecure.ThreatRemoval.Test
 
 		private static IConvertFile CreateConverter(IRequester requester = null)
 		{
-			return new ConvertFile(requester ?? new Mock<IRequester>().Object);
+			return new ConvertFile(requester ?? Substitute.For<IRequester>());
 		}
 	}
 }

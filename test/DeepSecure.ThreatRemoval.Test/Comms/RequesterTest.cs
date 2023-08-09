@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using DeepSecure.ThreatRemoval.Comms;
 using DeepSecure.ThreatRemoval.Model;
-using Moq;
+using NSubstitute;
 using NUnit.Framework;
 using RichardSzalay.MockHttp;
 
@@ -224,11 +224,11 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 
 		private IConfig MockConfig()
 		{
-			var mockConfig = new Mock<IConfig>();
-			mockConfig.SetupGet(m => m.SyncUrl).Returns("http://localhost");
-			mockConfig.SetupGet(m => m.ApiKey).Returns("qwerty123");
+			var mockConfig = Substitute.For<IConfig>();
+			mockConfig.SyncUrl.Returns("http://localhost");
+			mockConfig.ApiKey.Returns("qwerty123");
 
-			return mockConfig.Object;
+			return mockConfig;
 		}
 
 		private class TestApiErrorResponse

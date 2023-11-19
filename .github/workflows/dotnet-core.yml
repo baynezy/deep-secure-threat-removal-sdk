@@ -27,50 +27,6 @@ jobs:
         with:
           fossa-api-key: ecbc9c822e743eac0304c1cafcd2136e
 
-  static-analysis:
-    runs-on: windows-latest
-
-    steps:
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 7.0.x
-      - name: Set up JDK
-        uses: actions/setup-java@v2.4.0
-        with:
-          distribution: 'zulu'
-          java-version: 15.0
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v2.1.7
-        with:
-          path: ~\sonar\cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-      - name: Cache SonarCloud scanner
-        id: cache-sonar-scanner
-        uses: actions/cache@v2.1.7
-        with:
-          path: .\.sonar\scanner
-          key: ${{ runner.os }}-sonar-scanner
-          restore-keys: ${{ runner.os }}-sonar-scanner
-      - name: Install SonarCloud scanner
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-        shell: powershell
-        run: |
-          New-Item -Path .\.sonar\scanner -ItemType Directory
-          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
-      - name: Build and analyze
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        shell: powershell
-        run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"baynezy_deep-secure-threat-removal-sdk" /o:"baynezy" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-          dotnet build --configuration Release
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
   build-and-test:
     runs-on: ubuntu-latest
@@ -95,7 +51,7 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
-    needs: [static-analysis,build-and-test,open-source-scan]
+    needs: [build-and-test,open-source-scan]
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
 
     steps:

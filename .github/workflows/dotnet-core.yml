@@ -27,6 +27,7 @@ jobs:
         with:
           fossa-api-key: ecbc9c822e743eac0304c1cafcd2136e
 
+
   build-and-test:
     runs-on: ubuntu-latest
 
@@ -35,7 +36,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 7.0.x
       - name: Install dependencies
         run: dotnet restore
       - name: Build
@@ -58,7 +59,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 7.0.x
       - name: Output Version Number
         run: echo "Version-$VERSION_NUMBER.$GITHUB_RUN_NUMBER"
       - name: Install dependencies

@@ -1,4 +1,4 @@
-﻿name: Static Analysis Runner
+name: Static Analysis Runner
 
 on:
   workflow_run:
@@ -21,14 +21,14 @@ jobs:
           distribution: 'zulu'
           java-version: 15.0
       - name: Cache SonarCloud packages
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3.3.3
         with:
           path: ~\sonar\cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
       - name: Cache SonarCloud scanner
         id: cache-sonar-scanner
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3.3.3
         with:
           path: .\.sonar\scanner
           key: ${{ runner.os }}-sonar-scanner

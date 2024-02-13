@@ -166,7 +166,7 @@ namespace DeepSecure.ThreatRemoval.Comms
 
 		private sealed class RestApiResponse
 		{
-			public ApiErrorResponse Error { get; set; }
+			public ApiErrorResponse Error { get; init; }
 		}
 
 		private sealed class XOptionsHeader

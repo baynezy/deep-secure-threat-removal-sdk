@@ -1,38 +1,37 @@
 using System;
 
-namespace DeepSecure.ThreatRemoval.Model
+namespace DeepSecure.ThreatRemoval.Model;
+
+/// <summary>
+/// Configuration parameters for <c>IRequester</c>
+/// </summary>
+public class Config : IConfig
 {
-	/// <summary>
-	/// Configuration parameters for <c>IRequester</c>
-	/// </summary>
-	public class Config : IConfig
+	public Config(string syncUrl, string apiKey)
 	{
-		public Config(string syncUrl, string apiKey)
-		{
 			ErrorIfNull(syncUrl, nameof(SyncUrl));
 			ErrorIfNull(apiKey, nameof(ApiKey));
 			SyncUrl = syncUrl;
 			ApiKey = apiKey;
 		}
 
-		private static void ErrorIfNull(object parameter, string propertyName)
-		{
+	private static void ErrorIfNull(object parameter, string propertyName)
+	{
 			if (parameter == null)
 			{
 				throw new ArgumentNullException(propertyName);
 			}
 		}
 
-		/// <summary>
-		/// The URL for the synchronous API of the Deep Secure Threat
-		/// Removal API
-		/// </summary>
-		public string SyncUrl { get; }
+	/// <summary>
+	/// The URL for the synchronous API of the Deep Secure Threat
+	/// Removal API
+	/// </summary>
+	public string SyncUrl { get; }
 
-		/// <summary>
-		/// The API Key for the synchronous API of the Deep Secure Threat
-		/// Removal API
-		/// </summary>
-		public string ApiKey { get;}
-	}
+	/// <summary>
+	/// The API Key for the synchronous API of the Deep Secure Threat
+	/// Removal API
+	/// </summary>
+	public string ApiKey { get;}
 }

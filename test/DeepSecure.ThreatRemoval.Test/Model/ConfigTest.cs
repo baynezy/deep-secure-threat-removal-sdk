@@ -1,5 +1,6 @@
 using System;
 using DeepSecure.ThreatRemoval.Model;
+using FluentAssertions;
 using NUnit.Framework;
 
 namespace DeepSecure.ThreatRemoval.Test.Model
@@ -22,8 +23,8 @@ namespace DeepSecure.ThreatRemoval.Test.Model
 			const string apiKey = "qwerty123";
 
 			var ex = Assert.Throws<ArgumentNullException>(() => CreateConfig(syncUrl: syncUrl, apiKey:apiKey));
-			Assert.NotNull(ex);
-			Assert.That(ex.Message, Is.EqualTo("Value cannot be null. (Parameter 'SyncUrl')"));
+			ex.Should().NotBeNull();
+			ex!.Message.Should().Be("Value cannot be null. (Parameter 'SyncUrl')");
 		}
 
 		[Test]
@@ -33,8 +34,8 @@ namespace DeepSecure.ThreatRemoval.Test.Model
 			const string apiKey = null;
 
 			var ex = Assert.Throws<ArgumentNullException>(() => CreateConfig(syncUrl: syncUrl, apiKey:apiKey));
-			Assert.NotNull(ex);
-			Assert.That(ex.Message, Is.EqualTo("Value cannot be null. (Parameter 'ApiKey')"));
+			ex.Should().NotBeNull();
+			ex!.Message.Should().Be("Value cannot be null. (Parameter 'ApiKey')");
 		}
 
 		[Test]

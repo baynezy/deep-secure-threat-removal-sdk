@@ -7,6 +7,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using DeepSecure.ThreatRemoval.Comms;
 using DeepSecure.ThreatRemoval.Model;
+using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using RichardSzalay.MockHttp;
@@ -51,12 +52,12 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 			var requester = CreateRequester(mockHttp);
 
 			var ex = Assert.ThrowsAsync<ApiRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
-			Assert.NotNull(ex);
-			Assert.That(ex.ApiErrorResponse.Code, Is.EqualTo(errorResponse.Code));
-			Assert.That(ex.ApiErrorResponse.Message, Is.EqualTo(errorResponse.Message));
-			Assert.That(ex.ApiErrorResponse.Name, Is.EqualTo(errorResponse.Name));
-			Assert.That(ex.ApiErrorResponse.Path, Is.EqualTo(errorResponse.Path));
-			Assert.That(ex.ApiErrorResponse.Type, Is.EqualTo(errorResponse.Type));
+			ex.Should().NotBeNull();
+			ex!.ApiErrorResponse.Code.Should().Be(errorResponse.Code);
+			ex!.ApiErrorResponse.Message.Should().Be(errorResponse.Message);
+			ex!.ApiErrorResponse.Name.Should().Be(errorResponse.Name);
+			ex!.ApiErrorResponse.Path.Should().Be(errorResponse.Path);
+			ex!.ApiErrorResponse.Type.Should().Be(errorResponse.Type);
 		}
 
 		[Test]
@@ -67,8 +68,8 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 			var requester = CreateRequester(mockHttp);
 
 			var ex = Assert.ThrowsAsync<ApiRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
-			Assert.NotNull(ex);
-			Assert.That(ex.InnerException, Is.TypeOf<HttpRequestException>());
+			ex.Should().NotBeNull();
+			ex!.InnerException.Should().BeOfType<HttpRequestException>();
 		}
 
 		[Test]
@@ -79,8 +80,8 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 			var requester = CreateRequester(mockHttp);
 
 			var ex = Assert.ThrowsAsync<ApiRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
-			Assert.NotNull(ex);
-			Assert.That(ex.Message, Is.EqualTo("API Request Failed with a 500 response."));
+			ex.Should().NotBeNull();
+			ex!.Message.Should().Be("API Request Failed with a 500 response.");
 		}
 
 		[Test]
@@ -91,8 +92,8 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 			var requester = CreateRequester(mockHttp);
 
 			var ex = Assert.ThrowsAsync<ApiRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
-			Assert.NotNull(ex);
-			Assert.That(ex.Message, Is.EqualTo("API Request Failed with a 400 response."));
+			ex.Should().NotBeNull();
+			ex!.Message.Should().Be("API Request Failed with a 400 response.");
 		}
 
 		[Test]
@@ -103,8 +104,8 @@ namespace DeepSecure.ThreatRemoval.Test.Comms
 			var requester = CreateRequester(mockHttp);
 
 			var ex = Assert.ThrowsAsync<ApiRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
-			Assert.NotNull(ex);
-			Assert.That(ex.Message, Is.EqualTo("API Request Failed with a 429 response."));
+			ex.Should().NotBeNull();
+			ex!.Message.Should().Be("API Request Failed with a 429 response.");
 		}
 
 		[Test]

@@ -44,8 +44,8 @@ jobs:
       - name: Test
         run: dotnet test ./test/DeepSecure.ThreatRemoval.Test/DeepSecure.ThreatRemoval.Test.csproj --no-restore --verbosity normal --logger "junit;LogFileName=results.xml"
       - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action/composite@v1
-        if: always()
+        if: ${{ github.actor != 'dependabot[bot]' }}
+        uses: EnricoMi/publish-unit-test-result-action/composite@v2
         with:
           files: "**/TestResults/*.xml"
 

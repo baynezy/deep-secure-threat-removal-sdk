@@ -19,7 +19,7 @@ public class ConfigTest
 			const string syncUrl = null;
 			const string apiKey = "qwerty123";
 
-			var ex = Assert.Throws<ArgumentNullException>(() => CreateConfig(syncUrl: syncUrl, apiKey:apiKey));
+			var ex = Assert.Throws<ArgumentNullException>((Action)(() => CreateConfig(syncUrl: syncUrl, apiKey:apiKey)));
 			ex.Should().NotBeNull();
 			ex!.Message.Should().Be("Value cannot be null. (Parameter 'SyncUrl')");
 		}
@@ -30,7 +30,7 @@ public class ConfigTest
 			const string syncUrl = "https://example.com";
 			const string apiKey = null;
 
-			var ex = Assert.Throws<ArgumentNullException>(() => CreateConfig(syncUrl: syncUrl, apiKey:apiKey));
+			var ex = Assert.Throws<ArgumentNullException>((Action)(() => CreateConfig(syncUrl: syncUrl, apiKey:apiKey)));
 			ex.Should().NotBeNull();
 			ex!.Message.Should().Be("Value cannot be null. (Parameter 'ApiKey')");
 		}

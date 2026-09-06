@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -45,7 +46,7 @@ public class RequesterTest
 		mockHttp.When("*").Respond(HttpStatusCode.InternalServerError, "application/json", errorResponse.ToString());
 		var requester = CreateRequester(mockHttp);
 
-		var ex = Assert.ThrowsAsync<ApiRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
+		var ex = Assert.ThrowsAsync<ApiRequestException>((Func<Task>)(() => requester.Sync(new byte[10], MimeType.ApplicationPdf)));
 		ex.Should().NotBeNull();
 		ex!.ApiErrorResponse.Code.Should().Be(errorResponse.Code);
 		ex!.ApiErrorResponse.Message.Should().Be(errorResponse.Message);
@@ -61,7 +62,7 @@ public class RequesterTest
 		mockHttp.When("*").Respond(HttpStatusCode.InternalServerError, "application/json", new TestApiErrorResponse().ToString());
 		var requester = CreateRequester(mockHttp);
 
-		var ex = Assert.ThrowsAsync<ApiRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
+		var ex = Assert.ThrowsAsync<ApiRequestException>((Func<Task>)(() => requester.Sync(new byte[10], MimeType.ApplicationPdf)));
 		ex.Should().NotBeNull();
 		ex!.InnerException.Should().BeOfType<HttpRequestException>();
 	}
@@ -73,7 +74,7 @@ public class RequesterTest
 		mockHttp.When("*").Respond(HttpStatusCode.InternalServerError, "application/json", new TestApiErrorResponse().ToString());
 		var requester = CreateRequester(mockHttp);
 
-		var ex = Assert.ThrowsAsync<ApiRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
+		var ex = Assert.ThrowsAsync<ApiRequestException>((Func<Task>)(() => requester.Sync(new byte[10], MimeType.ApplicationPdf)));
 		ex.Should().NotBeNull();
 		ex!.Message.Should().Be("API Request Failed with a 500 response.");
 	}
@@ -85,7 +86,7 @@ public class RequesterTest
 		mockHttp.When("*").Respond(HttpStatusCode.BadRequest, "application/json", new TestApiErrorResponse().ToString());
 		var requester = CreateRequester(mockHttp);
 
-		var ex = Assert.ThrowsAsync<ApiRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
+		var ex = Assert.ThrowsAsync<ApiRequestException>((Func<Task>)(() => requester.Sync(new byte[10], MimeType.ApplicationPdf)));
 		ex.Should().NotBeNull();
 		ex!.Message.Should().Be("API Request Failed with a 400 response.");
 	}
@@ -97,7 +98,7 @@ public class RequesterTest
 		mockHttp.When("*").Respond(HttpStatusCode.TooManyRequests, "application/json", new TestApiErrorResponse().ToString());
 		var requester = CreateRequester(mockHttp);
 
-		var ex = Assert.ThrowsAsync<ApiRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
+		var ex = Assert.ThrowsAsync<ApiRequestException>((Func<Task>)(() => requester.Sync(new byte[10], MimeType.ApplicationPdf)));
 		ex.Should().NotBeNull();
 		ex!.Message.Should().Be("API Request Failed with a 429 response.");
 	}
@@ -109,7 +110,7 @@ public class RequesterTest
 		mockHttp.When("*").Respond(HttpStatusCode.Conflict, "application/json", new TestApiErrorResponse().ToString());
 		var requester = CreateRequester(mockHttp);
 
-		Assert.ThrowsAsync<HttpRequestException>(() => requester.Sync(new byte[10], MimeType.ApplicationPdf));
+		Assert.ThrowsAsync<HttpRequestException>((Func<Task>)(() => requester.Sync(new byte[10], MimeType.ApplicationPdf)));
 	}
 
 	[Test]

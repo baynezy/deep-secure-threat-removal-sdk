@@ -23,7 +23,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v7
       - name: Analyse with FOSSA
-        uses: fossa-contrib/fossa-action@v3
+        uses: fossa-contrib/fossa-action@v4
         with:
           fossa-api-key: ecbc9c822e743eac0304c1cafcd2136e
 
